@@ -1,0 +1,1152 @@
+# Scaffold Changelog & Lineage
+
+This is the **source repository** for the agentic-dev kit. Adopting
+repositories install it with `.github/scripts/scaffold-init.sh`; this file
+tracks the kit's own version history and how instances move between
+versions. In an instance, this same file records which version the instance
+adopted. The project's own changelog, if any, lives elsewhere — this file is
+about the scaffolding only.
+
+Convention: cite issues of *this* repository as a bare `#<n>`. Never carry a
+bare number over from another repository — a bare `#<n>` always resolves
+here, so an inherited number silently links to an unrelated issue.
+
+<!-- scaffold-version: repo=mochan-tk/agentic-dev-kit-for-copilot sha=45cad8a9cfd8e3e7079f47af1252bac55b3481bc date=2026-10-04 -->
+**Scaffold version adopted by this instance:** v1.0.0 *(this is the template
+itself; in a copied instance, update this line when upgrading — the
+onboarding PR should confirm it)*
+
+**Adopted:** from mochan-tk/agentic-dev-kit-for-copilot@45cad8a9cfd8e3e7079f47af1252bac55b3481bc (requested ref: main) on 2026-10-04.
+
+## Upgrading an instance
+
+1. On a branch in the adopted repository, re-run the installer with
+   `--upgrade` (one-liner: `curl -fsSL <raw-url>/scaffold-init.sh | bash -s -- --upgrade`;
+   pin the source with `SCAFFOLD_REF=<tag|sha>`). Scaffold-owned machinery
+   (`.github/scripts|skills|agents|prompts|ISSUE_TEMPLATE/**`, the PR
+   template, this changelog) is refreshed in place; tuned surfaces
+   (`copilot-instructions.md`, `workflows/`, `CODEOWNERS`,
+   `instructions/`, `AGENTS.md`) and existing `.github/docs/**` are kept.
+   Only allowlisted bootstrap docs are added when absent; kit history is
+   outside the install plan. Preview with `--upgrade --dry-run`.
+2. Review the staged diff (`git diff --cached`) and this changelog's
+   entries since your adopted version; port anything the kept files
+   need by hand — upgrades change procedures and templates, not your
+   project truth.
+3. Re-run `.github/scripts/tuning-status.sh` and the CI gates.
+4. Land as one PR titled `scaffold: upgrade to vX.Y.Z`; append a
+   `.github/docs/agreements/retro-log.md` row (class `scaffold-upgrade`).
+
+### Epic #119 migration: preserved adopter files
+
+Use this checklist when upgrading an existing instance across the landed
+#121 / [PR #122](https://github.com/mochan-tk/agentic-dev-kit-for-copilot/pull/122)
+startup/role clarification and #133 /
+[PR #139](https://github.com/mochan-tk/agentic-dev-kit-for-copilot/pull/139)
+reviewability wording. The latter is merged as `b4f30dcc`; its
+[completed outcome](https://github.com/mochan-tk/agentic-dev-kit-for-copilot/issues/133#issuecomment-5738634787)
+records the final text. The F06 workflow migration from #138 is detailed
+below. This checklist changes no constitution or installer behavior.
+
+#### What the upgrade does and does not apply
+
+The installer's [`upgrade_class`](.github/scripts/scaffold-init.sh) and
+[upgrade fixtures](.github/scripts/tests/test-scaffold-init.sh) distinguish
+existing-file collisions from absent files:
+
+| File class | `--upgrade` behavior | Adopter review |
+|---|---|---|
+| Engine: `.github/scripts/**`, skills, agents, prompts, issue templates, PR template, this changelog | Refreshes existing copies, including the governance-control manifest in `.github/scripts/`. | Read the new procedures and compare them with preserved local instructions/workflows. |
+| Tuned: `.github/copilot-instructions.md`, `.github/workflows/**`, `.github/CODEOWNERS`, `.github/instructions/**`, `AGENTS.md` | Keeps existing files; does not port these section-level changes. | Apply only the relevant reviewed wording, preserving project customizations. |
+| Instance docs: `.github/docs/**` | Keeps existing context, agreements, and other project truth; adds only absent allowlisted bootstrap docs. | Do not replace them with template documents; excluded kit history is neither installed nor deleted. |
+| Absent engine/tuned files and allowlisted bootstrap docs | Installs them, even when other files in that class are kept. | Inspect newly introduced instructions, bootstrap docs, and workflows as well as refreshed engine files. |
+| Seed-only `README.md` | Keeps it when present; seeds it only when absent. | Retain the project's own overview. |
+
+Engine refresh is not onboarding and does not make an adopter tuned. Preserve
+project-specific commands, implementation-model choices, ownership rules, and
+local tuning; do not replace an entire kept file to obtain a changed paragraph.
+
+#### Section-level checklist for landed changes
+
+The source-section links below pin the upstream instructions at `b4f30dcc`,
+which includes both landed changes, rather than pointing at an adopter's
+possibly older preserved copy.
+
+| Preserved file / section | Manual migration |
+|---|---|
+| `.github/copilot-instructions.md` / [First contact][migration-first-contact] (#121 / PR #122) | Keep the platform-specific startup command and the three outcomes: exit 0 = tuned; 1 = not onboarded; anything else, including a missing interpreter/script or invalid invocation, = failed check, not permission to proceed. On 1, acknowledge untuned and read an explicit owner decline linked from the current work order/kickoff; verify repository/work scope and continuing applicability. Carry the link/scope into child, replacement, and resumed sessions. Only a covered decline permits already-authorized work without repeating onboarding; otherwise offer `/onboard-project` and wait for explicit yes/no. Never infer opt-out from source markers, `sha=unknown`, forks, chat memory, or unrelated/revoked/contradictory decisions. A new explicit onboarding request still enters onboarding. Link the refreshed [canonical startup scenarios](.github/skills/session-orchestration/SKILL.md#startup-scenarios), rather than copying its table. |
+| `.github/copilot-instructions.md` / [Working a Task issue][migration-working-task] (#121 / PR #122) | Replace role-ambiguous ritual wording with supervisor-owned claim/resume, Plan/update, dispatch/release, escalation, and outcome comments. Workers execute the approved plan, maintain PR evidence and its Plan link, run every Verification command, and report to the supervisor; they do not post duplicate Task comments. Keep `risk:high` approval, record-before-report, scope/authority escalation, declared ownership, and the rule against weakening checks. Only a Task supervisor may use the declared small-task exemption; conductors cannot. Refer to the refreshed [child protocol](.github/skills/session-orchestration/SKILL.md#child-session-protocol) and [worker protocol](.github/skills/session-orchestration/SKILL.md#worker-protocol-adr-0003). |
+| `.github/copilot-instructions.md` / [Pull request conventions][migration-pr-conventions] (#133 / PR #139) | Port the landed wording: "Keep PRs reviewable: one Task issue per PR. Roughly 400 changed lines is a planning guideline, not an acceptance criterion or automatic stop/replan trigger." Link [plan-management / Rolling-wave decomposition](.github/skills/plan-management/SKILL.md#rolling-wave-decomposition) for semantic independence, authority, review difficulty, and tests/generated ratio. Remove stale count-only split/replan directives, not tests or scope limits. The planner agent is engine-refreshed; this preserved instructions paragraph still needs manual alignment. |
+
+#### Older-adopter constitution compatibility review
+
+These are **existing constitution duties**, not new Epic #119 amendments.
+Compare older local `AGENTS.md` wording with the source sections below and
+resolve any project-specific differences through the adopter's normal review
+process; this migration does not authorize a wholesale constitution replacement.
+
+| Existing `AGENTS.md` section | Compatibility check |
+|---|---|
+| [2: Record-before-report][migration-agents-2] | Preserve the Task Plan before implementation and the durable outcome before reporting; worker PR evidence/reporting follows the role-specific protocol above. |
+| [4: Unit of work][migration-agents-4] | Preserve one Task supervisor and one active worker per PR/worktree/branch, dispatch before implementation, and the explicitly declared supervisor-only small-task exemption. |
+| [5: Single-writer rule][migration-agents-5] | Keep declared File ownership, requester ownership of the Task body, append-only executor comments, and escalation rather than silent scope expansion. |
+| [9: Start ritual][migration-agents-9] | Keep the ordered reading of constitution, repository instructions, full Task, referenced agreements, and applicable skills before restating the goal, acceptance criteria, and ownership. |
+
+Treat `.github/instructions/**`, `.github/CODEOWNERS`, and `.github/docs/**`
+as preserved project truth, not a blanket-copy list. Retain path-specific
+rules, actual owners, reviewed agreements, and collected context. Review any
+absent-file additions separately; installation does not make template content
+an approved project agreement.
+
+#### F06: code and metadata CI separation (#138)
+
+Upgrade from a source ref containing both workflows. An absent
+`.github/workflows/task-ritual.yml` installs automatically, while an adopted
+`.github/workflows/ci.yml` (and an already present ledger workflow) is kept.
+**Installation alone is not migration:** it can leave the legacy ledger job
+and the new workflow producing the same `task-ritual` check.
+
+Port these sections together in one reviewed adopter PR, before landing or
+relying on the upgraded workflows. Do not replace the entire adopted CI:
+retain application build/test steps, local tuning, runner choices, action
+pins, checkout permissions, and project-specific checks.
+
+| File / section | Atomic migration |
+|---|---|
+| `.github/workflows/ci.yml` / `on.pull_request` and `concurrency` | Admit only `opened`, `synchronize`, `reopened`; retain push to `main` (or the adopter's default branch). Preserve the `ci-${{ github.ref }}` domain and PR-only cancellation. Remove `edited` from this code workflow, not by adding job-level skip conditions that emit success-shaped code contexts. Port the adjacent freshness-boundary comment. |
+| `.github/workflows/ci.yml` / `jobs.task-ritual` | Remove the legacy job when the separate ledger workflow is installed. Keep genuine `quality`, `scaffold-self-check`, `copilot-surface` and optional `windows-launcher` verification, including local application gates. |
+| `.github/workflows/task-ritual.yml` / events, concurrency, job | Admit PR `opened`, `synchronize`, `reopened`, `edited` and default-branch push; use the distinct `task-ritual-${{ github.ref }}` domain. Keep the sole `task-ritual` job PR-conditional, pinned checkout, `persist-credentials: false`, contents/issues/pull-requests read permissions, and unchanged `check-task-ritual.sh` invocation. Its skipped push check exists for default-branch issuer discovery, not as code verification. |
+| `.github/workflows/task-ritual.yml` / third step and job grants (#143) | After the unchanged guard, port the unconditional, fail-propagating `bash .github/scripts/check-retarget-freshness.sh` step. Pass `GH_TOKEN`, `GH_REPO`, `PR_NUMBER`, and `PR_HEAD_SHA` from `github.event.pull_request.head.sha`, not `GITHUB_SHA`. Add exactly checks/actions read to the existing three read grants; never write scopes. Ritual exemptions do not exempt this sensor. |
+| `.github/scripts/governance-controls.tsv` / `ci-task-ritual` | Engine refresh moves the anchored invocation target and remediation to `task-ritual.yml`. Inspect the new target together with the preserved workflows; refreshing the manifest cannot move a job or remove duplicate producers. |
+
+**Freshness boundary:** code verification covers the head SHA as merged into
+the base at run time, the same staleness class as base advancement under
+`strict: false`. Every `edited` event, including a base retarget, runs the
+ledger only: it cannot schedule, cancel, refresh, or substitute code checks.
+After retargeting, a new head push or close/reopen is required to refresh code
+verification against the new base; nothing automatically reopens the PR.
+Body-only evidence on an unchanged head and base does not cover retargets.
+Missing, cancelled, failed, or unavailable code verification remains
+unsatisfied; a passing metadata check is never evidence of successful code.
+
+**Retarget sensor (#143):** scripts and tests are engine-refreshed, but existing
+workflow copies are kept. A reviewed port of the third step, its environment,
+and both read grants is required; refreshing scripts alone does not activate it.
+The server-produced `base_ref_changed` timeline records a write-access retarget,
+not authenticated agents, sessions, comment authors, or historical permissions.
+Its UTC `created_at` and positive ID establish the latest boundary, including
+away-and-back retargets; array/ID order does not. It needs no `changes.base`, and
+nullable commit fields do not identify a tested merge. An edited webhook is a
+different source: validated `changes.base` can veto a result until a timeline
+retarget reaches the payload's PR `updated_at`, never prove positive freshness.
+
+A complete retarget-free timeline emits `NO_RETARGET` and exits 0 independently
+of code results: code verification remains separately required. After retarget,
+the sensor selects the unique latest original `created_at` among attributable
+current-head `ci.yml` pull-request runs, without filtering for success. Original
+creation must be strictly later than the retarget; a newer failure cannot fall
+back to an older success. An old original cannot become fresh through a rerun,
+even with later start/completion times. A full rerun of a fresh original can
+qualify, but an incomplete partial attempt cannot borrow earlier job successes.
+
+Each of `quality`, `scaffold-self-check`, and `copilot-surface` must have exactly
+one successful completed job in that current attempt, bound to its direct
+same-repository check ID, head, suite, name, status, timestamps and GitHub Actions
+issuer (slug `github-actions`, GitHub.com App ID 15368). Unsupported hosts or
+issuers require separately reviewed adaptation, never an unbound App fallback.
+Ledger, push, optional Windows, unrelated PR/head/workflow and synthetic-merge
+checks cannot substitute. Checks are attached to the PR head, not `GITHUB_SHA`;
+neither the PR's current merge SHA nor mutable run associations attest immutable
+historical merge parents or arbitrary workflow contents. The selected run's base
+repository/ref must match, with a nonempty associated base SHA; equality to the
+current base SHA is deliberately not required, preserving `strict: false` base
+advancement semantics. Empty or ambiguous associations fail uncheckable.
+
+Original creation <= run start <= check start <= completion is required, with
+both check times strictly after the latest retarget. Timestamp ties do not prove
+freshness. Timeline/run/attempt-job pagination must reach its terminal page with
+consistent counts and unique IDs; malformed, truncated or failed reads and the
+Actions 1000-result cap fail closed. Direct check reads avoid the reference-list
+1000-suite cap. Before success the bounded snapshot rereads PR/head/base-ref and
+retarget history, plus runs/attempt/jobs/checks on the retarget path; changes fail
+as unstable. There is no polling, cache, scheduling, transactional/TOCTOU guarantee
+or eventual-consistency guarantee.
+
+Exit 1 means stale, non-success or incomplete evidence; exit 2 means an API,
+permission, schema or identity ambiguity. Diagnostics name PR/head, retarget
+ID/time, context/run/attempt where known and the reason, distinguishing timestamp
+and pagination faults. Obtain new code verification through a new head push or
+close/reopen, not an old-code rerun. The independent ledger may still fail before
+new code finishes; once code succeeds, an operator can reevaluate the ledger
+(for example, manually rerun the ledger). That observes evidence only, never
+refreshes code. No automatic recovery or guaranteed concurrent completion exists.
+
+Run `bash .github/scripts/governance-drift.sh --root . --strict` and review
+every row. This source has exactly five ACTIVE controls; a missing, misplaced,
+or only-commented ledger invocation is MISSING. A report with all signatures
+ACTIVE still does not detect the old duplicate producer: inspect both
+workflows and actual run/check identities. Resolve adopter drift through the
+reviewed port or explicitly authorized waiver process, not automatic mutation.
+The five-control manifest is unchanged: its ACTIVE ritual signature alone also
+cannot prove sensor adoption. Inspect the third step and execute
+`bash .github/scripts/tests/run-tests.sh retarget-freshness ci-event-isolation`
+in the source (or explicitly opt into the adopter's guard tests) to verify the
+actual-YAML step/environment/grant contract, not just a manifest signature.
+
+Verify the exact required names `quality`, `task-ritual`,
+`scaffold-self-check`, `copilot-surface` and optional `windows-launcher`, with
+one intended producer per event and the same issuing GitHub App. Read checks
+and runs on the upgrade PR, including body edits during code verification,
+and after merge read default-branch check runs to confirm issuer discovery
+still sees the PR-conditional skipped `task-ritual` context. Compare live
+required contexts and issuer restrictions using GET-only ruleset reads.
+A workflow-name change must not turn into an unnoticed required-context
+rename: a missing required check stays pending, not successful. Stop if the
+adopter needs a context/issuer migration and scope that live change separately.
+
+Source-PR tests and hosted PR runs prove the proposed source behavior, not
+that an adopter has ported it or that live governance has changed. This
+migration authorizes no ruleset, variable, branch-protection, approval,
+write-token, privileged-event, or automatic-merge change. Preserve the
+existing PR evidence table and supervisor Outcome duties.
+
+#### Safe preview, review, and validation
+
+1. Work on an upgrade branch in the **adopted repository**, with a clean index.
+   Select a tag/full SHA, obtain and review the installer from that same ref,
+   and substitute real paths/ref in this preview example:
+   `SCAFFOLD_REF='<tag-or-full-sha>' bash /path/to/reviewed/scaffold-init.sh --upgrade --dry-run /path/to/adopter`.
+   Inspect every `upgrade`, `keep`, and `install` entry. Dry-run writes and
+   stages nothing. Do not run an installer against the source-template
+   working repository to validate this documentation.
+2. Only after accepting the preview, run that pinned installer against the
+   adopter without `--dry-run`. Review `git diff --cached` for automatically
+   staged installed/refreshed files. Port the applicable checklist rows by hand;
+   review `git diff`, stage only intended paths, then review
+   `git diff --cached` and `git diff --cached --check` again.
+3. Run `bash .github/scripts/tuning-status.sh --quiet` and inspect its exit:
+   0 = tuned, 1 = not onboarded (apply First contact above), any other outcome =
+   check error to diagnose, not tuned or untuned. On Windows use
+   `pwsh .github/scripts/run.ps1 tuning-status.sh --quiet`. CI's warning-only
+   `--ci` exit 0 is not proof of tuning; neither is a successful upgrade.
+4. Run `bash .github/scripts/governance-drift.sh --root .` in the adopter
+   and inspect each `ACTIVE`, `MISSING`, or `WAIVED` control against the
+   preserved files. Default exit 0 means a report was produced, not no drift;
+   `--strict` exits 1 for unwaived missing controls, and exit 2 is an input/schema
+   error. Resolve gaps through reviewed changes or existing authorized waiver
+   procedures, not by silently replacing project truth.
+5. Run the project's validated commands and existing CI gates; check the upgrade
+   PR with `gh pr checks <PR>`. Retain the ledger, quality, scaffold, and Copilot
+   surface checks configured by the adopter. Locally run
+   `bash .github/scripts/check-md-links.sh`,
+   `bash .github/scripts/check-changelog-refs.sh`, and `git diff --check`;
+   all should exit 0. The scaffold's guard regression runner normally skips
+   adopted instances; a skip does not replace project tests or green CI.
+   Carry the actual results, scoped onboarding decision if applicable, and any
+   unresolved drift into the upgrade PR for human review.
+
+[migration-first-contact]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/.github/copilot-instructions.md#first-contact
+[migration-working-task]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/.github/copilot-instructions.md#working-a-task-issue
+[migration-pr-conventions]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/.github/copilot-instructions.md#pull-request-conventions
+[migration-agents-2]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/AGENTS.md#2-record-before-report
+[migration-agents-4]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/AGENTS.md#4-unit-of-work
+[migration-agents-5]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/AGENTS.md#5-single-writer-rule
+[migration-agents-9]: https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/b4f30dcc85339b9f73150ea95d9998d379658980/AGENTS.md#9-start-ritual
+
+## Upstreaming (instance → template)
+
+When a retro fix is project-agnostic, open a matching PR on the template
+repository and mark the retro-log Fix cell `[upstreamed]` — see
+`.github/skills/retro/SKILL.md`, Upstreaming. That is how future projects
+inherit what this one learned.
+
+## Versions
+
+### Unreleased
+
+- Documentation installation now uses `scaffold-docs.manifest`, an explicit
+  eight-destination allowlist, with dedicated empty agreement/retro payloads.
+  Kit context collections, numbered kit ADRs and populated kit ledgers are
+  not installed or staged; unknown future docs are excluded too. Upgrade
+  preserves existing adopter truth, adds missing bootstrap docs, and never
+  reintroduces excluded kit records after manual removal. Force applies only
+  to allowed destinations. Invalid distribution data fails before writes
+  or staging (mochan-tk/agentic-dev-kit-for-copilot#174, derived from
+  mochan-tk/agentic-dev-kit-for-copilot#173).
+
+#### Migration: previously installed kit documentation
+
+Upgrades **never remove old kit records**. Before manual cleanup, compare
+each record below with the kit version at your recorded adoption SHA, using
+the [kit repository](https://github.com/mochan-tk/agentic-dev-kit-for-copilot).
+Keep anything your project modified or relies on; resolve differences through
+your normal reviewed PR, not a blanket deletion or file replacement.
+
+1. Inspect the six kit context collections under `.github/docs/context/`:
+   `development-speed/`, `hotl-review/`, `platform-capabilities/`,
+   `readme-redesign/`, `session-naming/`, `single-maintainer-rollout/`.
+   Inspect `ADR-0004-hotl-governance-sensors.md` in the agreements `adr/`
+   directory. Use `git rm` only on individually compared, unmodified kit
+   records your project does not rely on; retain all adopter material.
+2. Compare kit rows in `retro-log.md` and kit examples in `requirements.md`,
+   `glossary.md`, and `non-goals.md`. Reconcile only those inherited entries
+   by hand, keeping adopter requirements, vocabulary, non-goals and history.
+   Empty bootstrap payloads are starting templates, not replacements for
+   adopted ledgers.
+3. Reconcile the kept `AGENTS.md` and `copilot-instructions.md` map lines,
+   both tier READMEs in `.github/docs/context/` and `.github/docs/agreements/`,
+   and seed-only root `README.md`. Preserve tuning and project content.
+   State that only bootstrap docs are distributed, while kit history stays
+   at its existing root `docs/` and kit `.github/docs/` paths; root `docs/`
+   is not a required adopter destination and adopter ADRs start at ADR-0001.
+   Replace any inherited ADR-0004 link with the
+   [kit ADR directory](https://github.com/mochan-tk/agentic-dev-kit-for-copilot/tree/main/.github/docs/agreements/adr),
+   not a missing adopter file. Upgrades keep these files, so their wording
+   is not automatically ported.
+4. Review the staged diff, run tuning-status and the shipped CI guards,
+   and land the reconciled changes as one reviewed adopter PR. A later
+   `--upgrade` will not reinstall the removed kit records.
+
+#### Other unreleased changes
+
+- `governance-status.sh` and `setup-ruleset.sh` add an explicit
+  `single-maintainer` governance profile, opt-in only via
+  `--profile single-maintainer` or a persisted `SCAFFOLD_GOVERNANCE_PROFILE`
+  variable equal to that exact string; `solo` and `team` behavior is
+  unchanged. The profile requires a mandatory PR gate with zero required
+  approving reviews and no bypass actors on either the PR or required-checks
+  axis, while still requiring all configured CI contexts — the sensor emits
+  new `pull_request.no_bypass_actors` and `required_checks.no_bypass_actors`
+  checks (`ACTIVE`/`OFF`/`UNKNOWN`, never silently healthy on unreadable
+  bypass evidence) alongside the existing zero-approval reading of
+  `pull_request.required_approving_review_count`. The actuator reconciles an
+  existing canonical `solo`-shaped ruleset in place by deriving the candidate
+  from the real GET preimage — changing only the profile-controlled bypass and
+  approval fields — so producer-only metadata (for
+  example a real `require_extra_approval_for_unattributed_changes: true`)
+  survives untouched rather than being reset by a lossy template rebuild;
+  malformed, customized, or already-owned targets are still refused (#124).
+  The migration does not add or remove code-owner, latest-push, or other
+  review restrictions; those producer fields remain part of the refusal and
+  preservation boundary. Dry-run output is write-free and reports that it
+  makes no mutation.
+  Adoption is repository-local: a maintainer must decide each PR and head;
+  this profile does not enable automatic merging and cannot guarantee
+  authenticated human and agent identities are distinguishable.
+
+- `single-maintainer` is an explicit actuator selection, not a persisted sensor
+  result or an automatic team migration: a team-shaped ruleset is refused rather
+  than silently downgraded, while a solo-shaped ruleset is a compatible
+  migration. The sensor consumes the persisted intent but remains GET-only, and
+  each pull request and head still requires a maintainer decision.
+
+- Replaced the top-level README with the Human-on-the-Loop overview draft and committed the matching overview image at `docs/images/agentic-development-kit-overview.png`, preserving the owner-supplied source artifacts and provenance in `.github/docs/context/readme-redesign/`.
+
+- The top-level Copilot app role is now called the `Project session`, and new
+  sessions use the name `Project`. Existing sessions named `Program` remain
+  valid; no branch, label, issue, PR, Task-ritual, or runtime session migration
+  is required (#113).
+
+- Operator-facing governance documentation now integrates ADR-0004's sensor and
+  actuator boundary in one place: the README maps `ownership-overlap.sh`,
+  `governance-drift.sh`, `governance-status.sh`, and `setup-ruleset.sh`
+  dry-runs into the getting-started flow, explains their meaningful exit
+  states, and records the remaining limits and reopening trigger for runtime
+  capabilities that repository files still cannot truthfully provide. This
+  closes the integration pass for Epic #71 after the producer Tasks for
+  ownership overlap, drift detection, profile reconciliation, and persisted
+  governance intent landed (#88, #91, #96, #109).
+
+- Shared code-review instructions now assign each check to a mechanism instead
+  of asking every reviewer to perform one impossible all-purpose pass. Rubber
+  Duck owns supported-surface in-loop critique; Copilot code review owns
+  generic defects and craft; the custom `reviewer` owns Task linkage,
+  acceptance evidence, CI integrity, File ownership, deviations, and
+  governance safety; humans/rulesets retain requirement interpretation,
+  exceptions, formal approval, and merge authority. The first five ordered
+  checks still map exactly to the custom reviewer's contract, while official
+  AI review remains advisory and never satisfies approval (#76).
+- The repository-wide review-model preference from #68 is retired after one
+  day: official Rubber Duck already selects a contrasting model for in-loop
+  critique and can improve centrally. Onboarding still records the
+  implementation model, but no longer asks for or stores a review model.
+  Review now has three explicit, non-overlapping jobs: Rubber Duck critiques
+  evolving work where supported; Copilot code review finds generic code
+  defects; the custom `reviewer` audits the Task contract, evidence,
+  ownership, deviations, and governance safety. Existing adopters may delete
+  the stale `- **Review:** ...` line and its explanatory paragraph from their
+  tuned copilot-instructions; leaving it is harmless because no skill reads it
+  anymore. This partially supersedes #68 and fulfills #69 (#74).
+- The monthly retro hygiene review now keeps a source-template-only, deterministic
+  official capability ledger in `.github/scripts/platform-capability-baseline.tsv`.
+  It compares the committed baseline against exact official Copilot changelog,
+  RSS, and docs checkpoints, renders only official URLs and exact values, and
+  keeps `unknown` when a fetch fails or a source looks hostile or malformed.
+  That baseline is the engine-class follow-up to the initial Rubber Duck/#68
+  review-model seed and points #69 to the retirement decision that replaced that
+  stale review-model variant; it prevents adopted repositories from pretending to
+  be authoritative sources (#73).
+- Onboarding asks which model builds. Nothing had ever asked, so every
+  adopter ran on whatever their app defaulted to and no session downstream
+  could know otherwise — and unlike path restrictions or the roadmap board,
+  no later phase can discover an implementation-model preference. P2 now asks
+  one free-text question and P4 records the answer where `task-routing` reads
+  it. `auto` is a complete answer. **The scaffold names no model anywhere**:
+  it holds the adopter's answer and no opinion about which models exist this
+  month (#68; its short-lived review-model half is superseded by #74).
+- Guard regression tests no longer spend six minutes sleeping through
+  failures they deliberately created. Five ritual suites consumed 344 of the
+  regression step's 361 seconds because every missing comment or broken link
+  paid the production GitHub retry backoff: three attempts with two-second
+  pauses. Production keeps that exact contract; offline tests set only the
+  pause to zero, keeping every attempt and assertion. A behavioral fixture
+  makes the first two API calls fail, the third succeed, and shims `sleep` to
+  prove the default remains two seconds without waiting for it (#66).
+- Roadmap creation and population moved from unreachable prose into the
+  rolling-wave procedure that agents actually execute. An adopter created
+  nine Epics but saw only one on the board: the board check sat sixty lines
+  below the numbered decomposition steps, while `setup-project.sh` could add
+  an issue only through `dates`, which requires a schedule that future Epics
+  deliberately do not have yet. Step 0 now owns the one consent-gated board
+  offer, step 1 adds every Epic immediately, and step 6 schedules only issues
+  with real dates. New idempotent `add` places an issue and sets `Kind`
+  without touching date fields; `add` and `dates` share their item and Kind
+  logic so the two paths cannot drift (#54).
+- The README says what the kit is for before it says how it is built. Its
+  opening called this "an AI-agent development lifecycle" — which reads as a
+  kit for *building* AI agents, the opposite of the truth — and then spent
+  thirty lines on repository wiring, design premises and the execution plane
+  without naming a single problem any of it solves. It now opens with the
+  three pains (work you cannot see, decisions that scatter, not knowing how
+  much to delegate), defines **Agentic Development** as a layer over the
+  process a reader already runs rather than a replacement for it, and states
+  the two theses and the three places the new-team-member analogy breaks,
+  since the whole design follows from those. Two things that were buried are
+  now sections of their own: how the system learns (a second failure of a kind
+  is a pattern, answered with mechanism; project-agnostic lessons flow back to
+  the template) and how to start small, in three levels a reader can pick
+  between by the shape of their pain. The front-page name is **Agentic
+  Development Kit**; "scaffold" keeps its narrower job of naming what gets
+  installed into a repository (#62).
+- The kit's guard tests stay home. An adopter onboarding an existing project
+  spent over an hour, roughly thirty minutes of it inside `run-tests.sh` —
+  investigating seven Windows failures in tests they had not touched, for
+  machinery their project does not use. Nothing ever told them to run it:
+  `run-tests.sh` appears in no skill or instruction, but P5 asks for green CI
+  and `ci.yml` runs the suite, so every adopter inherited it. The tests now
+  decline outside the template, keyed on the `scaffold-version` marker
+  (`sha=unknown` is the template, a real sha is an adopter) — which reaches
+  repositories that already have `ci.yml`, since `--upgrade` never refreshes
+  workflows. `FORCE_GUARD_TESTS=1` overrides. The runner also takes suite
+  names, so one failing suite re-runs in seconds instead of six minutes, and
+  it now prints that expected runtime up front: this repository's own
+  maintainer read those six minutes as a hang, twice, on the day this was
+  written. P5 says plainly that it does not reach into the kit's internals
+  (#58).
+- The PR that installs the scaffold is no longer failed by the wall it
+  installs. An adopter opened one and `task-ritual` rejected it for having no
+  Task link — in a repository with no issues, no `AGENTS.md` on `main`, and
+  the enforcing workflow arriving in that very diff. The onboarding exemption
+  could not help: its self-limiting signal asks whether the base is already
+  adopted, which an adoption PR is by definition not. This path is ours to
+  support rather than an edge case, since README step 4 recommends a ruleset
+  that *requires* a pull request. A third exemption now covers it, on
+  structural signals only — the base has no `AGENTS.md`, and the PR adds both
+  `AGENTS.md` and `.github/copilot-instructions.md`. No title is involved:
+  adoption PRs have no naming convention. It is self-limiting the same way
+  the second one is — after the merge the base has `AGENTS.md` forever (#53).
+- A supervising session verifies the record, not the artifact. An adopter
+  measured three runs of the same verification for one result — supervisor,
+  Epic orchestrator and program session each running `gh pr view` and the same
+  build, with one task's RAM/Flash measurement executed twice and logged by the
+  Epic session itself as a coordination failure. Nothing here told them not to:
+  `verification`'s layers are CI layers, and they never said who runs them. They
+  now say it. Layer 1 runs twice by design — implementer, then CI — and CI's run
+  is authoritative, read from above through `gh pr checks`; a tier above
+  verifies the evidence table, the CI verdict and the diff against ownership,
+  and re-runs a command only to resolve a contradiction it can name. This
+  sharpens verify-before-done rather than relaxing it: every ground truth
+  `AGENTS.md` §3 lists is a read of the record, not a build (#55).
+- CI now runs the documented Windows invocation on a Windows runner. Two
+  adopter reports in one day — the orchestrator's tool grant (#47) and the
+  Windows first-contact command (#49) — were the same failure: neither had
+  regressed, both were wrong from the day they were written, and nothing here
+  had ever executed either. Every job in `ci.yml` ran on Linux, so the
+  launcher adopters actually touch was the one surface CI never did. The new
+  `windows-launcher` job drives `run.ps1` the way an adopter does and tells a
+  raising launcher apart from a repository that merely reports untuned — the
+  two look identical through an exit code alone. Nothing was added to the
+  always-on instruction files: the job is the fix, and a sentence restating
+  it would be scar tissue (#51).
+- Windows can run the first-contact check. `bash` there reaches the WSL
+  launcher, not Git Bash — the Git for Windows installer leaves `…\Git\bin`
+  off `PATH` deliberately, while `System32\bash.exe` is on it by default, so
+  the documented command failed on a correctly configured machine. New
+  `.github/scripts/run.ps1` resolves the real Git Bash (install locations
+  first, `System32` excluded) and re-executes any scaffold script through it,
+  forwarding arguments and exit code; it carries no judgement of its own, so
+  there is no second implementation to drift from the canonical `.sh`. The
+  same edit stops the check's exit code being read as two answers when it has
+  three: tuned, not tuned, and *could not run* — the last is now reported as
+  itself rather than as "not onboarded". macOS and Linux are unaffected: their
+  command is unchanged (#49).
+- The `orchestrator` agent can now run the protocol it exists to run. Its
+  `tools` allowlist granted `read`, `search`, `execute`, `agent` and
+  `github/*` — and `tools` is strict, so every app session tool was
+  withheld. Five of the six rows in session-orchestration's own protocol
+  table were unavailable to it: it could not dispatch, steer, approve a
+  `risk:high` plan, or tear a worker down. An adopter found it when a
+  `Program` session could not create an Epic session. The tools are now
+  named (product-specific names are ignored where they do not apply, which
+  is what makes a portable profile able to carry them), `edit` stays
+  withheld, and `check-agent-tools.sh` reconciles the allowlist against the
+  protocol table so the two cannot drift apart again — including rejecting
+  `edit` under any alias and the `*` wildcard. The defect dated from the
+  first commit, which is to say no Program session had ever been run on
+  this agent, here included (#47).
+- A dispatched session is now proven to have **started**, not merely to exist.
+  An adopter reported a child session created with a kickoff going idle having
+  run nothing: the session was there, the work never began, no error surfaced,
+  and the parent carried on believing the task was done. Their second
+  reproduction — default branch, effort `medium`, failing before any reasoning
+  — puts the cause squarely in the app, so the fix here is detection, not
+  prevention. The predicate moves from existence to the child's claim comment
+  on the issue, read with `gh`; an idle notification is described as a wake
+  that fires the same way for finished, dead, and never-started; and silence
+  from a child is checked rather than assumed successful. A dispatch that will
+  not start escalates as `needs:human` and is explicitly not a licence for the
+  conductor to implement the Task itself — the same temptation that produced
+  the boundary violation above (#45).
+- Conductor sessions are held to their role, and the limits of that are
+  stated. An adopter reported a program conductor implementing Task work in
+  its own workspace — twice, the second time after being corrected — by
+  calling a sub-agent "the Epic session" and invoking the small-task
+  exemption. The documents already forbade it; the gap was that nothing said
+  a sub-agent runs in the *caller's* workspace and is never a substitute for
+  a session, that a role is fixed at creation rather than reasoned about
+  mid-run, or that the exemption belongs to Task supervisors alone. All three
+  are now stated, and dispatch must confirm a real session exists before work
+  proceeds. The `orchestrator` role's tool grant is explained rather than
+  left to look like a fence: it withholds `edit`, but keeps `execute` because
+  every conducting step runs on it, and a shell writes files too — so the
+  grant narrows the path without closing it. Immutable role metadata,
+  per-session write denial and read-only workspaces are runtime features this
+  scaffold does not control, and the skill says so instead of implying
+  otherwise (refs #43).
+
+- Worker dispatches are now tied to a session and a branch, and the
+  small-task exemption must be declared before implementing. A dispatch
+  comment carried branch, PR and scope in prose, so nothing distinguished a
+  real dispatch from a supervisor that wrote the comment and implemented the
+  work itself — the split ADR-0003 exists to produce could not be shown. The
+  comment's first line now names the worker session, its ID and its branch,
+  and the wall requires the branch to be the PR's head ref (managed prefixes
+  allowed), which also stops one task's dispatch from satisfying another's
+  trail. What the wall cannot do is stated in its header rather than implied:
+  session trees are app-local, so the ID is a durable record for humans and
+  audits, never proof — the supervisor is responsible for raising the session
+  before writing the comment, and for not writing it at all when it cannot.
+  The exemption gains the chronology its dispatch counterpart already had:
+  declared after the first commit, it is hindsight rather than a decision the
+  trail records. Task supervision is also given its agent role — the default
+  agent with the session-orchestration skill — so `orchestrator`, which
+  conducts the program and Epic layers, is not chosen for it (refs #40, #7).
+  Release consumption from #7 is deliberately not implemented: it needs a
+  matching algorithm of its own, "ties pass" was a considered trade-off, and
+  the same-second collision it guards against has not been observed.
+
+- Onboarding now creates the program session and hands off to it, and
+  conducting sessions are no longer torn down. The program layer had no
+  creator — its protocol said it starts "when the phase Epics first exist"
+  while onboarding never mentioned it — and no rule said how long an Epic or
+  program session lives, so the leaf-first teardown guidance read as
+  applying all the way up. Together those produced the observed behaviour:
+  the first session became the Epic session, and when that Epic finished the
+  same session carried on as the next one, phase after phase in a single
+  thread. Onboarding now ends by creating a `Program` session and handing it
+  the Epics; that session waits for the evidence PR to merge before starting
+  the first Epic's session, since a phase run against a half-tuned
+  repository verifies nothing. Teardown is stated per layer: workers and
+  Task supervisors are archived as before, an Epic session lives until its
+  Epic closes, and the program session lives as long as the plan — which is
+  what keeps `Epic #1` and `Epic #2` visible side by side and guarantees a
+  live session owns starting the next phase (refs #39).
+
+- Sessions now have a naming convention: `Program`, `Epic #1`, `Task #6
+  supervisor`, `PR #12 worker`. Nothing said how to name a session, so agents
+  labelled them by role — `Task 6 supervisor` — and a sidebar of open
+  sessions read as a list of numbered roles with no way to tell which issue
+  each one served. Keeping the `#` is the point: a bare number could be
+  anything, and a worker's PR number is not its Task's. Issue titles stay
+  out deliberately, since session names are display strings in a narrow
+  column where short and uniform beats descriptive and truncated. The rule
+  is stated where sessions are created and referenced from both dispatch
+  steps (refs #37).
+
+- Agent-authored text no longer offers VS Code shortcuts. The README dropped
+  them when the Copilot app became the stated requirement, but the skills,
+  the Epic template and the installer banner stayed on the older convention
+  of naming both — so an app session ended onboarding by telling its user to
+  run `/breakdown-epic`, a command that surface does not have. The closing
+  handoff, the pointer written into each drafted Epic body, the context
+  follow-on, the Epic form's guidance and the banner's step 2 now name skills
+  only. `exec:ide` still names VS Code in the routing table, where it is a
+  fact about where that class of task runs rather than an instruction, and
+  the prompt files are unchanged for anyone using them (refs #35).
+
+- The README now reads as documentation for a kit used **in the GitHub
+  Copilot app**. Prerequisites said Copilot access "on at least one surface"
+  would do, which is plainly false: the lifecycle runs on the app's session
+  hierarchy — a program session starting each Epic's session, which
+  supervises its Tasks — and no other surface can spawn a session or receive
+  a report from one. The opening paragraph, Prerequisites and Getting
+  started now name the app as required and say why, and the VS Code slash
+  shortcuts are gone from the walkthrough: the README names skills, which is
+  what an app session loads. The prompt files keep one line in the
+  repository map, where they are the subject rather than an instruction.
+  What CLI and IDE chat actually do is unchanged and still visible: they
+  execute individual tasks, and `exec:ide` remains the route for work that
+  wants a human at the keyboard or physical hardware (refs #33).
+
+- `setup-project.sh` now fails up front when `gh` is not authenticated,
+  matching the three sibling setup scripts. It was the only one without the
+  probe, so an unauthenticated run got as far as a project API call and
+  failed there, reporting the call rather than the cause. The check lives in
+  the existing `require_tools()`, so every subcommand is covered, and the
+  message is byte-identical to the other scripts (refs #5).
+
+- The session model gains a program layer, so the next phase has an owner.
+  The mapping table bound an Epic to a parent session, but nothing said how
+  one starts — an adopter finishing a phase had no stated next move, and
+  phase-level decisions landed in whichever session happened to be open. A
+  program session now sits above the Epic sessions: it starts each one as
+  its phase comes up, watches across phases, and replans the outline when
+  reality diverges. Epic sessions report upward instead of spawning their
+  successors, which keeps them siblings — mirroring the issue graph, where
+  Epics are siblings too, and keeping the session tree at a constant depth
+  rather than one level deeper per phase. The `orchestrator` agent already
+  described this conductor and only scoped itself to one Epic; it now covers
+  both layers (refs #29).
+
+- The parent-session protocol now explains gated cloud CI. A dispatched
+  `exec:cloud` task can finish correctly — agent run green, draft PR opened,
+  fix included — while every check on that PR sits at `action_required`,
+  because many organizations gate workflow runs from this class of actor.
+  `gh pr checks` then reports "no checks reported", which reads as CI never
+  firing, and an adopter concluded the cloud agent had errored when it had
+  not. The dispatch step now names the two states and the diagnostic that
+  separates them (read the agent's own run, not just the PR's checks), and
+  says the gate is an organization Actions policy rather than a repository
+  setting — so adopters stop looking for a switch the scaffold could have
+  flipped. Where no such policy exists nothing appears (refs #28).
+
+- Agent-authored handoffs now name skills instead of VS Code-only commands.
+  An earlier pass fixed the README, the installer banner and the Epic
+  template, but stopped short of the text agents *write*: the pointer
+  embedded in every drafted Epic body, the closing handoff block, and the
+  remaining prose references. An adopter running onboarding in a Copilot app
+  session was told to "run `/breakdown-epic`" and "`/start-task`" — neither
+  exists on that surface, and no skill answers to those names either
+  (`plan-management` serves decomposition and replanning,
+  `session-orchestration` serves task start). The Epic-body pointer mattered
+  most: it is committed to GitHub and read by whoever opens the issue later.
+  The README's first-run flow is corrected too; the lifecycle table and repo
+  map still name the prompt files, where they are the subject rather than an
+  instruction (refs #25).
+
+- The `task-ritual` CI job can check out private repositories again. It
+  declared its own `permissions:` block, and a job-level block *replaces* the
+  workflow-level grant rather than merging with it — so `contents: read` was
+  lost and `actions/checkout` failed with "Repository not found" before the
+  guard ever ran. Public repositories clone without a token, so this
+  scaffold's own CI stayed green while every adopter on a private repository
+  saw a red check on every pull request. A new guard,
+  `check-workflow-permissions.sh`, fails CI when any job declares
+  `permissions:`, checks out, and omits `contents` — a static check, because
+  a public repository structurally cannot catch this class of defect by
+  running its own CI. Adopters already on private repositories pick the fix
+  up by re-running the installer with `--upgrade` (refs #24).
+
+- Onboarding now drafts one Epic per phase instead of a single Epic for the
+  whole project. The two skills contradicted each other — `plan-management`
+  asks for "Epics for the whole outline up front", `project-onboarding` said
+  "the outline Epic" — and the singular won in practice: one adoption ended
+  with nine phases inside one Epic, every later phase invisible, and the
+  natural-looking repair was a program Epic with phase Epics beneath it. The
+  graph has exactly two levels (Epic → Task), so that fix would have been
+  unsupported. Phase Epics are now siblings wired `blocked-by` in order; the
+  `/breakdown-epic` pointer, the deferred-from-onboarding ledger and the
+  closing handoff all ride the first phase's Epic, and a one-phase outline
+  still yields exactly one Epic. `plan-management` now states the sibling
+  rule outright rather than leaving it to be inferred (refs #22).
+
+- Decomposition now corrects the Epic's state line. Onboarding opens a draft
+  Epic with "nothing is decomposed until you approve", but nothing ever
+  removed that marker, so an Epic that had been reviewed, approved and split
+  into Task sub-issues still told every later reader — human or agent — the
+  opposite of the truth. The decomposition procedure now replaces it with one
+  line naming the phase just decomposed and the date, rewritten each round so
+  it stays true under rolling-wave; Epics that never carried the marker
+  simply gain the line. The skill states why this edit does not breach the
+  single-writer rule: AGENTS.md §5 binds an agent to its own Task issue, and
+  an Epic is the plan it works from, not the work order it executes
+  (refs #20).
+
+- `setup-project.sh init` now creates the board's working views —
+  `Roadmap` (roadmap layout), `Kanban` (board layout), `Backlog` (table
+  layout). It previously created none and told the adopter to build them in
+  the UI, because view creation "is not exposed by the GraphQL API"; that
+  stopped being true, and `createProjectV2View` handles all three layouts.
+  Views are matched by name on re-runs, so nothing is duplicated and an
+  adopter's own views are never renamed or removed; a refused creation warns
+  and leaves the board and its fields intact, since Projects write access
+  varies by account. Still manual, and now stated as such: the Roadmap view's
+  date fields and "Group by: Kind" — `createProjectV2View`'s configuration
+  input carries `visibleFieldIds` alone (refs #18).
+
+- The onboarding evidence PR no longer fails the `task-ritual` wall. The wall
+  demands every PR link a Task issue carrying a start claim and a plan
+  comment, but during onboarding no Task exists — the PR *is* the deliverable
+  — so every adopter hit a red check on their very first PR and could only
+  merge by bypassing it. The wall now exempts that PR when three signals
+  agree: the skill-mandated title `scaffold: onboard <project>`, a base
+  branch whose scaffold-version marker names a real commit (so the template
+  repository itself cannot claim it), and a base that still carries CUSTOMIZE
+  markers. The last two make the exemption self-limiting — it holds at most
+  once per adopting repository and lapses the moment onboarding merges.
+  Separately, the task-link extractor now tolerates a qualifier between
+  keyword and number, so the accurate `Refs Epic #2` parses (refs #16).
+
+- Issue references in this changelog no longer mis-resolve. GitHub resolves
+  a bare `#<n>` against the repository the file lives in, so the numbers
+  inherited from where this kit was developed did not go dead — they linked
+  to unrelated issues here, and would have gone on colliding as numbering
+  grew into their range. Those citations are dropped (the prose already says
+  what changed); references to this repository's own issues stay. A new
+  guard, `check-changelog-refs.sh`, fails CI on any bare number above this
+  repository's known range, and the changelog header states the convention
+  (refs #14).
+
+- The adoption instructions now name skills first: prompt files under
+  `.github/prompts/` are a VS Code Copilot Chat feature, so `/onboard-project`
+  is not a command in a Copilot app session or in Copilot CLI — it arrives as
+  plain text and works only if the model infers a skill was meant. Skills are
+  the portable layer (an open standard loaded by VS Code, Copilot CLI, and the
+  cloud agent alike), and `.github/skills/project-onboarding/SKILL.md` already
+  carries every instruction the prompt does, so nothing is lost by pointing
+  adopters at it. The install banner, README steps 2 and 6, the repo map, and
+  the Epic template now read "run the `<name>` skill (in VS Code: `/<shortcut>`)";
+  the prompt files keep working unchanged for VS Code users (refs #12).
+
+- The install banner now shows a push command that works on the app-session
+  path. It previously printed a bare `git push`, which assumes the adopter
+  is on the default branch with an upstream configured — neither holds in a
+  Copilot app worktree session, where the command fails outright ("no
+  upstream branch") and, even when it succeeds elsewhere, pushes to a branch
+  Actions never read. Step 1 now states the goal (land the scaffold on the
+  remote default branch), prints `git push origin HEAD:<default>` with the
+  branch name resolved locally from `origin/HEAD` (placeholder when it
+  cannot be resolved), and names the protected-branch alternative in one
+  clause (refs #10).
+
+- The install banner now tells adopters to **push**, not just commit. Step
+  1 named only `git commit`, so an adopter who followed it literally left
+  the scaffold off the remote default branch — where Actions never run,
+  breaking label bootstrapping and onboarding mid-flight. The banner now
+  names both commands, says why the push matters, and makes clear that
+  `/onboard-project` can do both if you skip them; a regression test keeps
+  the wording from drifting back (refs #8).
+
+- The README Conventions label list is complete again: it named nine of the
+  twelve labels `setup-labels.sh` creates. The three that were missing are
+  now covered in the same bullet — `risk:high` (described by its effect:
+  pauses a task after its plan comment until a human approves, where the
+  default is pass-through), `retro:candidate`, and `from:adopter`. An agent
+  reading only the README could not previously know the `risk:high` lever
+  existed (refs #3).
+
+- The "Use this template" adoption path is dropped; the installer is the
+  single way in and the repository stays non-template. The template path
+  copied the whole tree with no filter — this kit's own development
+  records (`docs/`, 15 files), its `LICENSE`, `.vscode/`, `.devcontainer/`
+  and the full changelog — none of which the installer ships. A brand-new
+  repository is still fully served: `git init`, then run the installer
+  (refs #1).
+
+- The top-of-README adoption banner is deleted: readers scan for Getting
+  started directly, and the banner dual-maintained both the install
+  commands and the onboarding journey. Install commands now appear exactly
+  once (step 1, restoring the single-carrier principle and superseding
+  the "banner stays" note); the journey lives in Getting started,
+  where step 2 (Onboard) now points at reviewing the drafted Epic and
+  running `/breakdown-epic` (full flow stays in step 6); `gh auth login`
+  was already covered by Prerequisites.
+
+- Getting started step 1 inlines both installer one-liners (sh +
+  PowerShell) instead of pointing readers back to the top banner ~150
+  lines away; the banner stays for repo-page visitors. Supersedes that
+  aspect of the dedup: the install commands intentionally appear in
+  both places.
+
+- README Getting started is restructured for scannability: every step (and
+  the Platforms note) now opens with a bold verb-first lead sentence and
+  carries its details as short bullets instead of running prose — all six
+  steps, every fact, both `--upgrade` code blocks, and each *Done when:*
+  line are preserved.
+
+- The README's duplicated guidance is collapsed into single authoritative
+  locations: the banner carries the install one-liners (Getting started
+  step 1 now references it), the Platforms paragraph carries the Git
+  Bash/WSL warning, and step 1 carries the "Use this template copies the
+  whole tree" note — and the `--upgrade` re-run gains a copy-pastable
+  bash code block beside the existing PowerShell one, which was lost when
+  Windows support was added (334 → 302 lines, no facts
+  removed). A full README-vs-reality audit in the same change fixed two
+  stale repo-map notes: the CODEOWNERS line now lists all three guarded
+  paths (agreements/, workflows/, connectors/) and the setup-ruleset.sh
+  line points at the step-4 gates (the ruleset moved from step 5 to
+  step 4 when Getting started was renumbered).
+
+- The onboarding closing handoff is now bound to a concrete trigger: the
+  chat message that announces the evidence PR must end with the numbered
+  handoff block, and problems (queued or failing checks, blockers) are
+  reported above the block, never instead of it (from adopter feedback
+  adopter re-validation — the durable carriers from the earlier hardening
+  worked, but the chat message announced the PR plus CI status and
+  dropped the handoff again: "final message" was undefined, "courtesy
+  copy" read as optional, and the problem report crowded out the ritual).
+  The `/onboard-project` prompt mirrors the trigger.
+
+- The README quickstart banner now names `/breakdown-epic` as the concrete
+  move after reviewing the drafted Epic (from adopter feedback — the
+  command was only named deep in Getting started, so an
+  adopter whose onboarding session ended without the closing handoff had
+  no visible path from the Epic to Task issues; the banner is the one
+  carrier that does not depend on agent compliance).
+
+- Onboarding now produces durable outputs instead of chat-only ones (from
+  adopter feedback — an onboarding run drifted into
+  implementing application code, ended without the closing handoff, and
+  its undone items evaporated with the session). The skill gains a third
+  invariant ("onboarding tunes; it does not build"), a
+  `## Deferred from onboarding` ledger appended to the draft Epic body
+  (evidence PR description when the Epic was skipped), a mandatory
+  `## Next steps` section closing the evidence PR description, and a
+  `/breakdown-epic` pointer written into the draft Epic body itself; the
+  `/onboard-project` prompt mirrors all three.
+
+- `setup-project.sh init` now detects a **closed** same-title board before
+  creating anything (from adopter feedback —
+  `gh project list` hides closed projects, so a closed roadmap board was
+  invisible to the reuse path and init would create a duplicate, or
+  dead-end in orgs that refuse API creation). Init exits with the exact
+  reopen command instead of mutating a board a human closed, and the
+  terminal failure message now carries the adopter-validated recovery:
+  where an org/enterprise silently refuses `createProjectV2` while the
+  web UI works, create or rename a board to the exact title and re-run
+  init to have fields and the repository link completed.
+
+- `setup-project.sh init` no longer trusts gh's project number blindly
+  (from adopter feedback — on Windows,
+  `gh project create` answered with number `0`, which gh's own project
+  commands treat as "no number supplied", so a successfully created
+  board cascaded into a `field-list` failure and was left without
+  fields or the repository link): a number that is not a positive
+  integer is re-resolved by exact-title lookup, both paths are
+  validated before any follow-up command, and the remaining failure
+  mode exits with the owner, the title, and the recovery. The header's
+  gh requirement now reads `>= 2.45` (`gh project link`) instead of the
+  impossible `2.95`.
+- The roadmap board gains an owner (from adopter feedback — "attach any
+  time later" had no owner: onboarding deferred
+  it, the breakdown prompt never mentioned it, and plan-management even
+  mandated date spans at decomposition against a board nothing created):
+  the first `/breakdown-epic` run now checks for the board and offers
+  `setup-project.sh init` with one consent question, sets the created
+  Tasks' schedule spans where dates are known, and records the outcome
+  in the Epic summary comment; the scheduling obligation is now
+  conditional on the board existing, and onboarding P2 defers to that
+  owner explicitly. A decline or a missing `project` scope
+  (`gh auth refresh -s project`) never blocks decomposition.
+- Onboarding P6 gains a closing handoff (from adopter feedback — a real
+  run ended at "pushed, PR not created" after
+  context compaction, leaving the adopter with no next move): P6 now
+  completes only when the evidence PR exists (a blocked creation must
+  be stated with the exact `gh pr create` command), and the final
+  message must hand the adopter their next moves — merge the evidence
+  PR, review the linked draft Epic, run `/breakdown-epic` on it to
+  start decomposition (a follow-up named the triggers: the handoff originally
+  said only "say the word", which left `/breakdown-epic` and
+  `/start-task` undiscoverable).
+- The Windows `--upgrade` invocation is now documented (README and the
+  `scaffold-init.ps1` header, from adopter feedback): plain `irm … | iex`
+  cannot forward flags, so upgrades use the script
+  block form `& ([scriptblock]::Create((irm <raw-url>))) --upgrade` —
+  the shim already forwards arguments; only the documentation was
+  missing.
+- Onboarding P0 gains a commit preflight: an uncommitted or unpushed
+  scaffold is detected before anything else, and after one consent
+  question the agent commits (`Adopt agentic-dev scaffold`) and pushes
+  it itself (from adopter feedback — the manual
+  banner step was a functional prerequisite with no guard: app/cloud
+  sessions see no scaffold at all, the evidence PR bloats, and early
+  branch-protection activation locks the adoption commit out). No
+  GitHub write (labels, ruleset, Epic) happens before the push; the
+  install banner now says onboarding offers to commit for you. A follow-up
+  tightened the check to the real prerequisite — the scaffold must be
+  reachable from the remote *default branch*, not merely pushed (from
+  adopter feedback: a real run landed the adoption commit on a
+  feature branch, both legacy checks passed, and GitHub Actions later
+  failed mid-flight because the default branch had no scaffold) — and
+  the remedy now lands the commit on the default branch immediately,
+  never deferring it to the evidence PR.
+- The installer gains `--upgrade`: adopted repositories can now pull
+  scaffold updates without hand-diffing (from adopter feedback — the
+  previous choice was refuse-or-`--force`, and
+  `--force` flattens tuned files, so adopters stayed frozen at their
+  adopted version). On collision, scaffold-owned machinery (scripts,
+  skills, agents, prompts, issue/PR templates, this changelog) is
+  refreshed in place while tuned surfaces (`copilot-instructions.md`,
+  `workflows/`, `CODEOWNERS`, `instructions/`, `AGENTS.md`) and
+  `.github/docs/**` are kept and listed; absent files install in every
+  class, so new machinery still arrives. `--upgrade --dry-run` previews
+  the class-labeled plan; `--upgrade --force` is a usage error; the
+  provenance lines stack and the version marker stays single. A
+  dedicated upgrade banner hands off diff review, changelog porting,
+  re-verification, and the one-PR landing.
+- Onboarding P2-close now asks one branch-protection consent question and
+  runs `.github/scripts/setup-ruleset.sh` per the answer — the manual
+  "run the script, then enable it in Settings → Rules → Rulesets" step
+  most adopters never performed is gone from the handoff (from adopter
+  feedback). The installer banner shrinks to two
+  next steps (commit → onboard). The script now promotes an existing
+  same-name ruleset's enforcement in place (partial-body PUT, verified
+  live — rules/conditions/bypass untouched) instead of skipping, and
+  the shipped payload grants repository admins a *pull-request-only*
+  bypass (actor_id 5, verified live): a solo adopter cannot approve
+  their own PRs, so without it activation would deadlock the repository
+  on its own onboarding PR; direct pushes stay blocked for everyone.
+  Free-plan private repositories are refused by the rulesets API — the
+  refusal is recorded in the evidence log and never blocks onboarding.
+  New offline guard suite `test-setup-ruleset.sh` pins the payload, the
+  skip, the promotion, the write-free dry-run, and the fail-loud list.
+- Onboarding now closes P2 by bootstrapping the canonical labels and
+  drafting a coarse outline Epic from the adopter's goal and handed-over
+  material, handing its URL over for review **while** P3 verification
+  runs — from adopter feedback: verification is the long
+  stretch and the adopter previously waited idle, with the first Epic
+  sequenced entirely after onboarding. The Epic stays draft-marked and
+  undecomposed (rolling-wave; no invented REQ-###s); the label bootstrap
+  moved out of P4; quick-adopt step ③ becomes "approve the drafted Epic
+  (or file your own)"; the legacy path's characterization-tests
+  recommendation now targets the draft Epic and is restated in the PR.
+- The "register repo-resident docs?" interview question is gone, from
+  adopter feedback: its answer was always the recommended
+  choice, so it gathered nothing only a human knows. Documents already
+  committed to the repository are no longer registered into
+  `.github/docs/context/` at all — P1's inventory names them and agents
+  read them in place; only handed-over (external) material lands in
+  context/. The unconditional hand-over invitation is unchanged.
+- Material-intake wording no longer promises an upload control the
+  question dialog lacks, from adopter feedback: the
+  onboarding invitation now leads with the two universal channels —
+  file paths and pasted text — and frames attachments as a
+  surface-conditional follow-up sent in a regular chat message after
+  answering; interviewing agents are told the dialog itself takes only
+  a choice or typed text.
+- Label bootstrap folded into onboarding, from adopter feedback: the
+  manual "Bootstrap labels" step is gone from the installer's
+  handoff banner (now three steps: commit → onboard → ruleset) and from
+  README's quick-adopt and Getting-started paths. `/onboard-project`
+  already ran `setup-labels.sh`; the onboarding skill now runs it
+  unconditionally (it is idempotent) and records the output as evidence.
+  The installer stays local-write-only, and `setup-labels.sh` remains
+  available for standalone use (`-R owner/repo`).
+- CRLF landmine defused, from adopter feedback: the template
+  now ships a root `.gitattributes` pinning scaffold paths (`.github/**`
+  and the root scaffold files) to LF, and the installer seeds it like
+  `README.md`/`.gitignore` (kept untouched when the target already has
+  one). A Windows checkout with `core.autocrlf=true` can no longer
+  rewrite the bash scripts to CRLF — which breaks them under Git Bash —
+  and the `LF will be replaced by CRLF` warning flood during install is
+  gone (regression-tested with `core.autocrlf=true`). Existing instances:
+  copy the template's `.gitattributes` to your repository root and commit
+  it before any branch switch.
+- Windows handoff, from adopter feedback: when the installer runs under
+  an MSYS shell (Git for Windows exports `MSYSTEM`), the closing banner
+  now appends a note to run the `bash ...` next steps inside Git Bash —
+  plain `bash` typed into PowerShell may launch the WSL launcher, which
+  lacks the user's `gh` login. POSIX banner output is unchanged, and
+  README's quick-adopt note and "Bootstrap labels" step now say the same.
+- Install progress and speed, from adopter feedback: `scaffold-init.sh`
+  prints one plain status line per phase (resolving the ref, downloading
+  and unpacking, file plan, installing with file count, staging) instead
+  of minutes of silence, and the per-file `dirname`/`mkdir`/`cp` install
+  loop is replaced by one `mkdir -p` plus a single `tar` pipe — ~250
+  process spawns down to ~3, the dominant cost on Git Bash (MSYS) under
+  corporate antivirus. `--dry-run` output is unchanged; no terminal
+  control codes, so piped output stays clean.
+- Windows install: the repo-root guard in `scaffold-init.sh` no longer
+  compares the shell's `pwd -P` to `git rev-parse --show-toplevel` — on
+  Git Bash those spell the same directory differently (`/c/...` vs
+  `C:/...`), so the documented PowerShell one-liner refused at the real
+  repository root. The guard now uses `git rev-parse --show-prefix`
+  (empty exactly at the root), and the previously uncovered
+  subdirectory-refusal case gained a regression test. From adopter
+  feedback.
+- Interview is now hand-over only, from adopter feedback: the last
+  three non-hand-over questions (forbidden paths, secrets policy, org
+  board) are deleted — path limits are per-task File ownership, secrets
+  specifics are discover-when-needed, boards attach any time via
+  `setup-project.sh` — and the remaining flow is sequenced instead of
+  batched: connector choice first, then material intake branching on
+  the answer (spec-kit → workspace path; default → chat attachments /
+  paths / pasted text, with the register/skip add-on for repo-resident
+  docs). `/onboard-project` step 2 reworded to match; the ≤10 bank cap
+  is gone.
+- Interview bank cut to owner-only questions, from adopter feedback:
+  the four infrastructure questions (active vs frozen areas, trusted
+  build/lint/test commands, firmware envs/device host, runtime pins)
+  are deleted — facts the repo could answer belong to P1/P3, absent
+  signals are recorded as "none found", firmware envs are auto-judged
+  and the device host is discovered at routing time; the spec
+  hand-over invitation (attach in chat / file paths / paste) is now
+  extended unconditionally — the register/skip question for
+  repo-resident docs is additional, never a replacement — and the
+  interviewer receives handed-over material before leaving P2.
+  Bank shrinks 9 → 5.
+- README "Getting started" step 1 now shows the Windows (PowerShell)
+  one-liner next to the `curl` forms — the intro blockquote had it
+  since the fix, but the step-by-step guide did not.
+- Onboarding question bank revised from adopter feedback, three items
+  from one interview: repo-resident docs found by P1 now get a plain
+  register/skip question — landing mechanics (copy vs reference index)
+  and scaffold paths are banned from question and choices;
+  the two hand-over questions share one term, existing vs *future*
+  "specification or design material"; the CI/cloud-agent
+  constraint questions are deleted — P3 measures gate behavior
+  empirically and runner sizing is discover-when-needed. Bank shrinks
+  11 → 9.
+- Agent-mediated installs no longer lose the handoff: the installer
+  banner now addresses an installing AI agent directly — relay the
+  next steps to the human and offer to run `/onboard-project` — so the
+  guidance survives when the one-liner is executed as a tool call
+  from a chat instead of a human terminal. Adopter feedback.
+- Onboarding now wires in context connectors: P2 gains a connector
+  question (Q10 — built-in interview default vs existing spec-kit
+  workspace, "don't know" safe), P4 activates the choice via
+  `.github/scripts/setup-sources.sh` and points at `/kickoff-context`
+  as the follow-on; `/onboard-project` step list mentions the
+  activation. Closes the Epic integration seam reported by adopter
+  feedback.
+- gh authentication preflight: `setup-labels.sh` and `setup-ruleset.sh`
+  now probe `gh api user` up front and fail with `run: gh auth login`
+  before doing any work (previously they died mid-run on the first API
+  call). The installer treats a present-but-unauthenticated `gh` exactly
+  like gh-absent — resolution and tarball fetch fall back to
+  `git ls-remote` + codeload, so public adoption works logged-out; fetch
+  errors now hint that private sources need `gh auth login`. README
+  adoption steps gain step ⓪ (authenticate once). Adopter feedback.
+- Onboarding interview: context-intake question (P2 Q9) reworded into
+  adopter language — asks for specification/design material, names the
+  intake paths (chat attachment, file path, pasted text) and format
+  guidance (Markdown preferred); landing mechanics stay in the P4 seed
+  step. First adopter-feedback-driven change.
+- Windows adoption path: new `.github/scripts/scaffold-init.ps1` bootstrap
+  locates Git Bash (standard Git for Windows locations, then `PATH`;
+  the WSL launcher is skipped) and re-executes the canonical bash
+  installer through it — arguments forwarded, exit code propagated;
+  SHA pinning and all safety logic stay in the bash script, the single
+  implementation. README documents the PowerShell one-liner; all other
+  scaffold scripts run inside Git Bash or WSL.
+
+### v1.0.0 — 2026-08-09
+
+First public release. A generic, Copilot-native template for the agentic
+development lifecycle: GitHub issues, pull requests, and committed files
+are the only shared memory; human judgment concentrates at dispatch and at
+the Three Merges; everything between is designed to run without a human in
+the loop.
+
+- Constitution and context tiers: `AGENTS.md` (§1–§9: persistence,
+  record-before-report, verify-before-done, unit of work, single-writer,
+  ambiguity, rolling-wave planning, English-only, start ritual), always-on
+  `copilot-instructions.md`, path-scoped instruction files, and on-demand
+  skills.
+- Eight skills with scripts and canonical templates: context-collection,
+  context-distillation, plan-management (frontier + new-task helpers),
+  task-routing, session-orchestration, verification, retro, and
+  project-onboarding.
+- Proportional agreements: a promotion bar (`context-distillation` skill)
+  decides what becomes reviewed truth — most knowledge rides in Task
+  issues; substantive agreement changes get a dedicated PR, declared
+  wording riders ride the implementation PR.
+- Work orders as an issue graph: Epic/Task issue forms mirrored by body
+  templates; test-first acceptance criteria (executable checks land before
+  implementation — the wall judges, not the account); the tracking graph
+  (sub-issue, blocked-by, `#N`, `Closes #N` — `Refs #N` for post-merge
+  acceptance) with one-line origin citations; the working plan lands as a
+  Task-issue comment before implementation; work-order body edits require
+  a change comment.
+- Session protocol: start ritual with claim and plan comments; crash-only
+  resume (position from ledger + ground truth; orphan detection is the
+  parent's duty); three doors for intervening in a running task with a
+  `risk:high` gate for the exceptions; four-quadrant diagnosis (work order
+  / plan / diff / evidence); an escalation ladder whose failure budgets
+  are defined once, in the normative skills.
+- Two-tier task execution (ADR-0003): a Task issue may run as a
+  supervisor + worker pair — the supervisor dispatches, steers, and
+  independently verifies; the worker implements. Every Task declares its
+  execution mode on the ledger: a `Dispatching worker` / `Releasing
+  worker` comment trail, or a small-task exemption phrase in the plan
+  comment. Session teardown is leaf-first (workers before their
+  supervisor), and the session-orchestration skill carries the full
+  protocol: kickoff completeness, report hops as pointers, ground-truth
+  verification of worker claims.
+- Three custom agents (planner, orchestrator, reviewer) with pinned
+  `tools:` restrictions; `exec:cloud` dispatch by assigning the issue to
+  the Copilot coding agent; `copilot-setup-steps.yml` preinstalls the wall
+  toolchain for cloud sessions.
+- Deterministic CI walls: quality (SHA-pin enforcement, escalation-wording
+  check, tuning status), scaffold-self-check (pinned shellcheck +
+  actionlint, template-sync, Markdown path references, dev-container
+  validation), copilot-surface (strict-YAML frontmatter, size ceilings,
+  English-only), task-ritual (claim + plan comments in chronological
+  order, plan-before-code, comment immutability, plan-link integrity,
+  execution-mode declaration), connectors conformance, and a monthly
+  retro-hygiene report — backed by an offline guard-test harness
+  (12 suites) that pins every wall's behavior with negative proofs.
+- Supply chain: every action pinned to a full commit SHA with an enforced
+  `# vX.Y.Z` end-of-line comment; sha256-verified tool downloads;
+  `persist-credentials: false` on all checkouts.
+- Two adoption paths: `curl -fsSL …/scaffold-init.sh | bash` installs the
+  scaffold-owned set at any repo root (write-free `--dry-run`, symlink
+  refusal, SHA-resolved fetches, `**Adopted:**` provenance under the
+  machine-readable scaffold-version marker in this file), or GitHub
+  "Use this template" for brand-new repos.
+- Pluggable context connectors (ADR-0001): the collect → distill layer
+  sits behind a written Context Contract with a CI conformance wall;
+  ships `builtin` (draft-first elicitation via `/kickoff-context`) and
+  `speckit` (adopt an existing spec-kit workspace at a pinned revision),
+  plus the `setup-sources.sh` activation wizard with plan-aware
+  preflight.
+- Consent-gated adopter feedback (ADR-0002): on scaffold script failure,
+  an interactive TTY session offers — never auto-sends — a pre-filled
+  upstream issue built from a fixed eight-field allowlist (no arguments,
+  no paths, no environment); the receiving workflow labels `from:adopter`
+  from body marker or title prefix without checking out untrusted code.
+  Documented for adopters in `.github/docs/adopter-feedback.md`.
+- Namespace ownership: the scaffold owns `.github/` plus the root files
+  it shipped (`AGENTS.md`, this changelog, seeded `README.md` /
+  `.gitignore`); every other path is the application's. The template
+  repository's own dev records live in root `docs/` and are **not**
+  installed; walls scan scaffold-owned paths only.
+- Contributor environment: `.devcontainer/` (ubuntu-24.04, gh + jq +
+  sha-pinned shellcheck) reproduces the wall toolchain; CI validates it
+  when present.
+- Repository bootstrap: label set, branch ruleset (created disabled for
+  human review), optional Projects v2 roadmap board; onboarding as a
+  procedure (inventory → gap interview → run-verified commands → evidence
+  PR) with `tuning-status.sh` keeping the untuned state visible; existing
+  codebases start with characterization tests.
+- MIT `LICENSE`; the README opens with the after-copying path.
