@@ -1,0 +1,219 @@
+# Deterministic verification gates (layer 1 of .github/skills/verification/SKILL.md).
+# These checks are the ceiling on agent autonomy: the cloud agent iterates on
+# their failures, and branch rulesets should require them before merge.
+name: CI
+
+on:
+  pull_request:
+    # Verification covers the head SHA merged into the base at run time:
+    # the same staleness class as base advancement under strict: false.
+    # All edited events, including a base retarget, run the ledger only
+    # (task-ritual.yml); they never refresh or replace code verification.
+    # After retargeting, refresh with a new head push or close/reopen.
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Supply-chain wall: every action reference must be pinned to a full
+      # commit SHA with a trailing version comment (tags can be moved or
+      # re-signed; SHAs cannot). Logic lives in the script so the guard
+      # regression tests (.github/scripts/tests/) can exercise it offline.
+      - name: Action references are SHA-pinned
+        run: bash .github/scripts/check-action-pins.sh
+
+      # A job-level permissions block replaces the workflow-level grant, so a
+      # job that checks out must repeat `contents: read`. The failure is
+      # invisible here — public repositories clone without a token — and only
+      # bites adopters on private ones, hence a static check.
+      - name: Job permissions cover checkout
+        run: bash .github/scripts/check-workflow-permissions.sh
+
+      # Escalation-wording wall: failure budgets live only in the normative
+      # skills; every other surface defers to the ladder without restating
+      # counts (duplicated numbers drift from the design authority).
+      - name: Escalation counts stay in the normative skills
+        run: bash .github/scripts/check-escalation-wording.sh
+
+      # CUSTOMIZE: replace the placeholder below with the project's real
+      # gates, and keep them in sync with the "validated commands" section of
+      # .github/copilot-instructions.md. Pin any action you add to a full
+      # commit SHA (resolve one with:
+      # gh api repos/<owner>/<repo>/git/ref/tags/<tag> --jq .object.sha).
+      # Examples:
+      #
+      # - uses: actions/setup-node@<full-commit-sha> # vX.Y.Z
+      #   with: { node-version: 22, cache: npm }
+      # - run: npm ci
+      # - run: npm run lint
+      # - run: npm test
+      #
+      # Firmware logic tests run on the host — no hardware in CI
+      # (.github/instructions/firmware.instructions.md):
+      # - run: pip install --upgrade platformio
+      # - run: pio test -e native -d firmware
+      # - run: pio run -d firmware        # build all envs as a compile gate
+
+      - name: Scaffold tuning status
+        run: bash .github/scripts/tuning-status.sh --ci
+
+  # Lints the scaffold itself: shell scripts, workflow files, and the
+  # consistency of issue-form templates and Markdown path references.
+  scaffold-self-check:
+    runs-on: ubuntu-latest
+    env:
+      SHELLCHECK_VERSION: v0.11.0
+      SHELLCHECK_SHA256: 8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198
+      ACTIONLINT_VERSION: 1.7.12
+      ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The guards guard the repo; these tests guard the guards. Offline
+      # regression cases (sandbox repos + a gh fixture shim) must pass
+      # before the walls below are trusted. They are the kit's own, not an
+      # adopting project's: in a repository that installed the scaffold this
+      # step prints one line and exits 0, because the machinery under test
+      # belongs to us and its CI is here (#58).
+      - name: Guard regression tests
+        run: bash .github/scripts/tests/run-tests.sh
+
+      - name: Install pinned shellcheck
+        run: |
+          curl -fsSLo shellcheck.tar.xz "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.xz"
+          echo "${SHELLCHECK_SHA256}  shellcheck.tar.xz" | sha256sum -c -
+          tar -xJf shellcheck.tar.xz
+          sudo install "shellcheck-${SHELLCHECK_VERSION}/shellcheck" /usr/local/bin/shellcheck
+          rm -rf shellcheck.tar.xz "shellcheck-${SHELLCHECK_VERSION}"
+          shellcheck --version
+
+      - name: Shellcheck scaffold-owned shell scripts
+        # Scope: .github/** only — app-owned scripts (e.g. a top-level
+        # scripts/ dir) are the application's own business, not the
+        # scaffold's. The pathspec matches recursively.
+        run: git ls-files -z '.github/*.sh' | xargs -0 shellcheck -S style
+
+      # Validates the scaffold-shipped dev container (this repository's
+      # own). Gated on the sync-header sentinel
+      # in post-create.sh: adopting repos without it — installer adopters,
+      # or apps with their own dev container (where JSONC is legitimate) —
+      # are never linted, per the ownership rule above.
+      - name: Validate the scaffold-shipped dev container
+        run: |
+          if ! grep -qs 'ci.yml' .devcontainer/post-create.sh; then
+            echo "No scaffold-shipped dev container detected — skipping."
+            exit 0
+          fi
+          jq empty .devcontainer/devcontainer.json || {
+            echo "::error::.devcontainer/devcontainer.json must stay strict JSON (jq-parseable); drop this step if you intentionally moved to JSONC."
+            exit 1
+          }
+          git ls-files -z '.devcontainer/*.sh' | xargs -0 -r shellcheck -S style
+
+      - name: Install pinned actionlint
+        run: |
+          curl -fsSLo actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          echo "${ACTIONLINT_SHA256}  actionlint.tar.gz" | sha256sum -c -
+          tar -xzf actionlint.tar.gz actionlint
+          sudo install actionlint /usr/local/bin/actionlint
+          rm -f actionlint.tar.gz actionlint
+          actionlint --version
+
+      - name: Actionlint workflow files
+        run: actionlint -color
+
+      - name: Check issue-form templates stay in sync with body templates
+        run: bash .github/scripts/check-template-sync.sh
+
+      - name: Check Markdown path references resolve
+        run: bash .github/scripts/check-md-links.sh
+
+      - name: Check changelog issue references resolve to this repository
+        run: bash .github/scripts/check-changelog-refs.sh
+
+      - name: Check connector definitions conform
+        run: bash .github/scripts/check-connectors.sh
+
+  # The Copilot execution-plane wall: surface frontmatter, size ceilings,
+  # and the English-only rule.
+  copilot-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate the Copilot surface
+        run: |
+          # The wall parses frontmatter with PyYAML; probe the dependency
+          # first so a missing module is exit 2 (missing tool), never a
+          # silent pass.
+          python3 -c "import yaml" || {
+            echo "::error::PyYAML is not importable — the surface wall cannot parse frontmatter."
+            exit 2
+          }
+          bash .github/scripts/check-copilot-surface.sh
+
+  # Why a Windows runner for one command: #47 and #49 both shipped broken and
+  # stayed broken, because nothing here had ever executed them (retro #51).
+  # Every other job runs on Linux, so the Windows launcher — the one surface
+  # adopters touch that CI never did — is exercised here the way they run it.
+  windows-launcher:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: The documented Windows invocation resolves Git Bash
+        shell: pwsh
+        run: |
+          # `--quiet` documents no output and an exit code only, so stderr
+          # holds a PowerShell error or nothing. That is the discriminator:
+          # a launcher that raises and a repository that still has CUSTOMIZE
+          # markers both leave the exit code at 1, and this repository is the
+          # template, so 1 is its normal answer.
+          & pwsh .github/scripts/run.ps1 tuning-status.sh --quiet 2> launcher-stderr.txt
+          $code = $LASTEXITCODE
+          $err = (Get-Content launcher-stderr.txt -Raw -ErrorAction SilentlyContinue)
+          Remove-Item launcher-stderr.txt -ErrorAction SilentlyContinue
+          if ($err) {
+            throw "run.ps1 raised instead of returning an exit code:`n$err"
+          }
+          if ($code -ne 0 -and $code -ne 1) {
+            throw "run.ps1 returned $code; tuning-status.sh --quiet documents 0 (tuned) or 1 (markers remain)."
+          }
+          "run.ps1 returned $code - Git Bash was resolved and the script ran."
+          # Actions appends `exit $LASTEXITCODE` to a pwsh step, so the code
+          # this step deliberately accepts would otherwise fail it. Reached
+          # only when both assertions above passed; a throw never gets here.
+          exit 0
+
+      - name: Record what bare bash resolves to here
+        shell: pwsh
+        run: |
+          # Diagnostic, never an assertion. A hosted runner's PATH is not a
+          # stock desktop's: if Git\bin happens to be on it here, bare `bash`
+          # works on this machine and would still fail for the adopter. This
+          # line is what tells a future reader which of the two they are
+          # looking at.
+          $found = @(Get-Command bash -All -CommandType Application -ErrorAction SilentlyContinue |
+            ForEach-Object { $_.Source })
+          if ($found) { $found -join "`n" } else { "bash is not on PATH at all" }
+          exit 0
