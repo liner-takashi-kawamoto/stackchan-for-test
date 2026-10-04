@@ -19,10 +19,10 @@
       alt="CI status"
     >
   </a>
-  <a href="LICENSE">
+  <a href="https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/main/LICENSE">
     <img
-      src="https://img.shields.io/badge/License-MIT-blue.svg"
-      alt="MIT License"
+      src="https://img.shields.io/badge/kit%20license-MIT-blue.svg"
+      alt="Kit license: MIT"
     >
   </a>
 </p>
@@ -57,9 +57,9 @@ memory, or agent self-report the source of truth.
 ## How it works
 
 <p align="center">
-  <a href="docs/images/agentic-development-kit-overview.png">
+  <a href="https://raw.githubusercontent.com/mochan-tk/agentic-dev-kit-for-copilot/main/docs/images/agentic-development-kit-overview.png">
     <img
-      src="docs/images/agentic-development-kit-overview.png"
+      src="https://raw.githubusercontent.com/mochan-tk/agentic-dev-kit-for-copilot/main/docs/images/agentic-development-kit-overview.png"
       width="100%"
       alt="Human-on-the-Loop overview of the Agentic Development Kit, with GitHub Copilot app as the primary runtime and GitHub as the durable control surface"
     >
@@ -332,4 +332,9 @@ and retro for repeated friction. Start with [`AGENTS.md`](AGENTS.md).
 
 ## License
 
-Licensed under the [MIT License](LICENSE).
+The scaffold installed here comes from
+[mochan-tk/agentic-dev-kit-for-copilot](https://github.com/mochan-tk/agentic-dev-kit-for-copilot),
+which is licensed under the
+[MIT License](https://github.com/mochan-tk/agentic-dev-kit-for-copilot/blob/main/LICENSE).
+The installer does not add a `LICENSE` file, so this repository's own license
+is not set by the scaffold.
